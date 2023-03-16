@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 from typing import Any, Optional, List, Dict, Union
 
-from neptune.new import init_run
 from pytorch_lightning.loggers.neptune import NeptuneLogger
 
 from src import MODELS, NEPTUNE_LOGS
@@ -31,13 +30,7 @@ class NeptuneLogging(NeptuneLogger):
             # running, but does pollute stderr unnecessarily
         )
         kwargs = dict(default_kwargs, **kwargs)
-        if "with_id" in kwargs:
-            kwargs["run"] = kwargs["with_id"]
-            del kwargs["with_id"]
-            assert isinstance(kwargs["run"], str)
-            super().__init__(run=init_run(**kwargs))
-        else:
-            super().__init__(**kwargs)
+        super().__init__(**kwargs)
 
         self.run_id = str(self.experiment["sys/id"].fetch())
 

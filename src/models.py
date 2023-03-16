@@ -1,14 +1,9 @@
-import itertools
-import json
-import os
-from typing import Tuple, List, Union, Callable
+from typing import Tuple, List
 
 import pytorch_lightning as pl
 import torch
 import torchmetrics
 from torch import nn
-
-from src import MODELS, NEPTUNE_LOGS
 
 
 class BaseModule(pl.LightningModule):
@@ -56,6 +51,8 @@ class BaseModule(pl.LightningModule):
         self.criterion = getattr(nn, self.model_config["loss_function"])()
         self.learning_rate = self.model_config["learning_rate"]
         self.accuracy = torchmetrics.Accuracy(num_classes=self.model_config["number_of_classes"], task="multiclass")
+
+        self.epoch_metrics = {"train": [], "validation": [], "test": []}
 
     def _get_layers(self) -> nn.Sequential:  # TODO Klaus(?): Add different kinds of layers, as we go along.
         """
@@ -153,9 +150,10 @@ class BaseModule(pl.LightningModule):
         model_output = self(image_batch)
         loss = self.criterion(model_output, label_batch)
         self.log("train_loss", loss)
+        self.epoch_metrics["train"].append(dict(loss=loss.detach()))
         return {"loss": loss, "train_loss": loss.detach()}
 
-    def training_epoch_end(self, outputs) -> None:  # TODO Klaus add type of outputs
+    def on_train_epoch_end(self) -> None:  # TODO Klaus add type of outputs
         """
         This will be called after one epoch of training steps.
         Arguments: # TODO Klaus What is the type and shape of training_step_outputs?
@@ -165,7 +163,8 @@ class BaseModule(pl.LightningModule):
         """
         logs = {}
         for metric in ["loss"]:
-            logs[f"train_avg_{metric}"] = torch.stack([x[f"train_{metric}"] for x in outputs]).mean()
+            logs[f"train_avg_{metric}"] = torch.stack([x[metric] for x in self.epoch_metrics["train"]]).mean()
+        self.epoch_metrics["train"].clear()
         self.log_dict(logs)
 
     def validation_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> dict:
@@ -191,19 +190,19 @@ class BaseModule(pl.LightningModule):
         val_accuracy = self.accuracy(model_output.argmax(dim=1), label_batch)
         self.log("val_loss", val_loss)
         self.log("val_accuracy", val_accuracy)
+        self.epoch_metrics["validation"].append(dict(loss=val_loss, accuracy=val_accuracy))
         return {"val_loss": val_loss, "val_accuracy": val_accuracy}
 
-    def validation_epoch_end(self, outputs) -> None:  # TODO Klaus Add type of val_step_outputs
+    def on_validation_epoch_end(self) -> None:
         """
         This will be called after one epoch of validation steps.
-        Arguments: # TODO Klaus What is the type and shape of val_step_outputs?
-            outputs: Collection of the return values of all validation_steps.
         Logs:
             The average value of every given metric during the previous validation epoch.
         """
         logs = {}
         for metric in ["loss", "accuracy"]:
-            logs[f"val_avg_{metric}"] = torch.stack([x[f"val_{metric}"] for x in outputs]).mean()
+            logs[f"val_avg_{metric}"] = torch.stack([x[metric] for x in self.epoch_metrics["validation"]]).mean()
+        self.epoch_metrics["validation"].clear()
         self.log_dict(logs)
 
     def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> dict:
@@ -213,23 +212,22 @@ class BaseModule(pl.LightningModule):
         test_accuracy = self.accuracy(model_output.argmax(dim=1), label_batch)
         self.log("test_loss", loss)
         self.log("test_accuracy", test_accuracy)
+        self.epoch_metrics["test"].append(dict(loss=loss, accuracy=test_accuracy))
         return {"test_loss": loss, "test_accuracy": test_accuracy}
 
-    # FIXME Klaus: If there is a difference, I would like to call on_test_end, but I don't know, if I can use the outputs arguments in that case.
-    def test_epoch_end(self, outputs) -> None:  # TODO Klaus: Add type of outputs
+    def on_test_epoch_end(self) -> None:
         """
         This will be called after one epoch of test steps, i.e. the whole test.
-        Arguments: # TODO Klaus: What is the type and shape of val_step_outputs?
-            outputs: Collection of the return values of all test_steps.
         Logs:
             The average value of every given metric during the previous validation epoch.
         """
         logs = {}
         for metric in ["loss", "accuracy"]:
-            logs[f"test_{metric}"] = torch.stack([x[f"test_{metric}"] for x in outputs]).mean()
+            logs[f"test_{metric}"] = torch.stack([x[metric] for x in self.epoch_metrics["test"]]).mean()
         self.log_dict(logs)
 
-    def predict_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
+    def predict_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int,
+                     dataloader_idx: int = 0) -> torch.Tensor:
         image_batch, label_batch = batch
         model_output = self(image_batch)
         return model_output.argmax(dim=1)

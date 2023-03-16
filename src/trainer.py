@@ -5,7 +5,6 @@ from warnings import warn
 
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor, EarlyStopping
-import neptune.new as neptune
 
 from src import models, datasets, ml_logging, PL_LOGS, NEPTUNE_LOGS
 
@@ -56,7 +55,6 @@ def train_model(model: models.BaseModule, logger_kwargs: dict = None,
         kwargs = dict(max_epochs=max_epochs,
                       enable_progress_bar=True,
                       default_root_dir=str(PL_LOGS),
-                      weights_save_path=str(neptune_logger.local_filepath),
                       logger=neptune_logger, callbacks=callbacks,
                       devices=1, accelerator="auto")
         kwargs.update(trainer_kwargs) if trainer_kwargs is not None else {}

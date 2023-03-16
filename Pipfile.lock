@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a3cd191169e74e8b8e0c282b763ca12b1c8195359a5d5ab5d109c5c6cf2f0b81"
+            "sha256": "20e72d08cf82b3c366ee9c770bd099848f262a6a3a4ccc0d838955477bab838d"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -234,7 +234,7 @@
                 "sha256:1bb6ef75d84140c851fffe6420baaee5037d840070cfe11d60913be6ab8e0530",
                 "sha256:8ac8bbb645e49607917a5c07808116c708521f51e80d9c29bc4a168ff4dd22c6"
             ],
-            "markers": "python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_full_version != '3.5.0'",
+            "markers": "python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'",
             "version": "==11.0.3"
         },
         "bravado-core": {
@@ -242,7 +242,7 @@
                 "sha256:0da9c6f3814734622a55db3f62d08db6e188b25f3ebd087de370c91afb66a7f4",
                 "sha256:e231567cdc471337d23dfc950c45c5914ade8a78cde7ccf2ebb9433fcda29f40"
             ],
-            "markers": "python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_full_version != '3.5.0'",
+            "markers": "python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'",
             "version": "==5.17.1"
         },
         "certifi": {
@@ -573,11 +573,11 @@
         },
         "fonttools": {
             "hashes": [
-                "sha256:51c72f26a5b79fc77d59f22e9d146350fbd1d107430ddda7b7665b1be38b16ad",
-                "sha256:54c871c0587c1f3ad3a71b390e503edbb4638d90ad14f905f2fa5938a72fc76b"
+                "sha256:909c104558835eac27faeb56be5a4c32694192dca123d073bf746ce9254054af",
+                "sha256:f5e764e1fd6ad54dfc201ff32af0ba111bcfbe0d05b24540af74c63db4ed6390"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==4.39.1"
+            "version": "==4.39.0"
         },
         "fqdn": {
             "hashes": [
@@ -823,11 +823,11 @@
         },
         "jupyter-core": {
             "hashes": [
-                "sha256:1407cdb4c79ee467696c04b76633fc1884015fa109323365a6372c8e890cc83f",
-                "sha256:4bdc2928c37f6917130c667d8b8708f20aee539d8283c6be72aabd2a4b4c83b0"
+                "sha256:6db75be0c83edbf1b7c9f91ec266a9a24ef945da630f3120e1a0046dc13713fc",
+                "sha256:d4201af84559bc8c70cead287e1ab94aeef3c512848dde077b7684b54d67730d"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==5.2.0"
+            "version": "==5.3.0"
         },
         "jupyter-events": {
             "hashes": [
@@ -1268,10 +1268,10 @@
             "markers": "python_version >= '3.7'",
             "version": "==5.7.3"
         },
-        "neptune-client": {
+        "neptune": {
             "hashes": [
-                "sha256:5ad6dda67d7bfc580dac25c3e749ece920b31cfbfd42955f87b1ccd3ebd93327",
-                "sha256:91c7600a674cb812969bfb29a2ee0a6f7aeddabfb0c8205057a2ecb21b76cc79"
+                "sha256:04314011238273da663f1075553e69bf686aba269786a95df8c0bf4fe7022fd4",
+                "sha256:a7cbf39167ad370b39558c7f25772d99ba09faa4b791cc1cd0bf27a81b8994ce"
             ],
             "index": "pypi",
             "version": "==1.0.2"
@@ -2264,7 +2264,7 @@
                 "sha256:8a388717b9476f934a21484e8c8e61875ab60644d29b9b39e11e4b9dc1c6b305",
                 "sha256:aa751d169e23c7479ce47a0cb0da579e3ede798f994f5816a74e4f4500dcea42"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_full_version != '3.5.0'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'",
             "version": "==1.26.15"
         },
         "wcwidth": {
