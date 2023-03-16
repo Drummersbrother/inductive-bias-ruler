@@ -6,6 +6,15 @@ import torchmetrics
 from torch import nn
 
 
+class Parallel(nn.Module):
+    def __init__(self, parallel_modules):
+        super().__init__()
+        self.parallel_modules = nn.ModuleList(parallel_modules)
+
+    def forward(self, x):
+        return torch.stack([module(x) for module in self.parallel_modules])
+
+
 class BaseModule(pl.LightningModule):
     """
     This class is a LightningModule that configures itself according to model_config.
@@ -47,7 +56,8 @@ class BaseModule(pl.LightningModule):
         super().__init__()
         self.model_architecture = "FC"  # Is automatically changed in _get_layers(), if needed.
         self.dataset_name = self.model_config["dataset_name"]
-        self.layers = self._get_layers()  # Sequential
+        self.n_ensembled: int = model_config["n_ensembled"]
+        self.models = Parallel([self._get_layers() for _ in range(self.n_ensembled)])  # Sequential
         self.criterion = getattr(nn, self.model_config["loss_function"])()
         self.learning_rate = self.model_config["learning_rate"]
         self.accuracy = torchmetrics.Accuracy(num_classes=self.model_config["number_of_classes"], task="multiclass")
@@ -116,7 +126,7 @@ class BaseModule(pl.LightningModule):
 
         Returns: torch.tensor of torch.Size([b, number_of_classes])
         """
-        return self.layers(input_batch)
+        return self.models(input_batch)
 
     def configure_optimizers(self) -> Tuple[List, List]:
         """
@@ -148,7 +158,7 @@ class BaseModule(pl.LightningModule):
         """
         image_batch, label_batch = batch
         model_output = self(image_batch)
-        loss = self.criterion(model_output, label_batch)
+        loss = sum(self.criterion(mo, label_batch) for mo in model_output)
         self.log("train_loss", loss)
         self.epoch_metrics["train"].append(dict(loss=loss.detach()))
         return {"loss": loss, "train_loss": loss.detach()}
@@ -186,8 +196,8 @@ class BaseModule(pl.LightningModule):
         """
         image_batch, label_batch = batch
         model_output = self(image_batch)
-        val_loss = self.criterion(model_output, label_batch)
-        val_accuracy = self.accuracy(model_output.argmax(dim=1), label_batch)
+        val_loss = sum(self.criterion(mo, label_batch) for mo in model_output)
+        val_accuracy = sum(self.accuracy(mo.argmax(dim=1), label_batch) for mo in model_output)/self.n_ensembled
         self.log("val_loss", val_loss)
         self.log("val_accuracy", val_accuracy)
         self.epoch_metrics["validation"].append(dict(loss=val_loss, accuracy=val_accuracy))
@@ -208,8 +218,8 @@ class BaseModule(pl.LightningModule):
     def test_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> dict:
         image_batch, label_batch = batch
         model_output = self(image_batch)
-        loss = self.criterion(model_output, label_batch)
-        test_accuracy = self.accuracy(model_output.argmax(dim=1), label_batch)
+        loss = sum(self.criterion(mo, label_batch) for mo in model_output)
+        test_accuracy = sum(self.accuracy(mo.argmax(dim=1), label_batch) for mo in model_output)/self.n_ensembled
         self.log("test_loss", loss)
         self.log("test_accuracy", test_accuracy)
         self.epoch_metrics["test"].append(dict(loss=loss, accuracy=test_accuracy))
@@ -230,4 +240,4 @@ class BaseModule(pl.LightningModule):
                      dataloader_idx: int = 0) -> torch.Tensor:
         image_batch, label_batch = batch
         model_output = self(image_batch)
-        return model_output.argmax(dim=1)
+        return model_output.argmax(dim=2)
