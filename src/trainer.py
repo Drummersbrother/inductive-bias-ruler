@@ -7,7 +7,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor, EarlyStopping
 import neptune.new as neptune
 
-from src import models, datasets, logging, PL_LOGS, NEPTUNE_LOGS
+from src import models, datasets, ml_logging, PL_LOGS, NEPTUNE_LOGS
 
 # Py3.9 doesn't support type aliases from PEP613
 RunId = str
@@ -35,7 +35,7 @@ def train_model(model: models.BaseModule, logger_kwargs: dict = None,
 
     data_module = datasets.get_data_module(model.dataset_name, dl_kwargs=model.model_config["dl_kwargs"])
 
-    with logging.NeptuneLogging(
+    with ml_logging.NeptuneLogging(
             tags=["training", model.model_architecture],
             **({} if logger_kwargs is None else logger_kwargs)) as neptune_logger:
         neptune_logger.local_upload_json(model.model_config, "model_config")

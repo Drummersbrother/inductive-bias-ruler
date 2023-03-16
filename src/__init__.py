@@ -21,4 +21,4 @@ from os import environ as env
 
 assert "NEPTUNE_API_TOKEN" in env, "$NEPTUNE_API_TOKEN is not set, please modify either .env or your system-level env vars"
 
-from src import models, datasets, plotting, utils, trainer, logging
+from src import models, datasets, plotting, utils, trainer, ml_logging
