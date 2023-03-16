@@ -4,6 +4,19 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+torch = "*"
+numpy = "*"
+jupyter = "*"
+tqdm = "*"
+matplotlib = "*"
+torchvision = "*"
+pytorch-lightning = "*"
+seaborn = "*"
+torchmetrics = "*"
+pandas = "*"
+python-dotenv = "*"
+pip = "*"
+neptune-client = "*"
 
 [dev-packages]
 
