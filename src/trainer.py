@@ -73,7 +73,7 @@ def train_model(model: models.BaseModule, logger_kwargs: dict = None,
         # This has to be fetched within the logging context manager, otherwise the logger is already closed
         run_id = neptune_logger.run_id
 
-    return run_id
+    return model
 
 
 def train_models(models: List[models.BaseModule], **train_model_kwargs) -> List[RunId]:
